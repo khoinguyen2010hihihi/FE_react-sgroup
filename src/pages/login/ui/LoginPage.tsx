@@ -1,24 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import api from "@/shared/lib/axios";
+import { loginApi } from "@/features/auth/api/loginApi";
 import { AlertCircle } from "lucide-react";
+import type { LoginInput, LoginResponse } from "@/features/auth/model/types";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -26,10 +20,10 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    try {
-      const res = await api.post("/auth/login", { email, password });
-      const data = res.data;
+    const loginInput: LoginInput = { email, password };
 
+    try {
+      const data: LoginResponse = await loginApi(loginInput);
       if (!data.success) {
         setError(data.message || "Login failed");
         return;
@@ -40,7 +34,7 @@ export default function LoginPage() {
 
       navigate("/home");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Cannot connect to server");
+      setError(err.message || "Cannot connect to server");
     } finally {
       setLoading(false);
     }
